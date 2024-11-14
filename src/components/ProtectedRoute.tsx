@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authUser?.uid) {
+    if (!loading && !authUser?.uid) {
       router.push("/log-in");
     }
   }, [authUser]);
@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children }: Props) => {
       <div className="w-full mt-24 flex justify-center">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-zinc-800" />
-          <h3 className="font-semibold text-xl">Setting up your account...</h3>
+          <h3 className="font-semibold text-xl">Verifying...</h3>
           <p>You will be redirected automatically.</p>
         </div>
       </div>

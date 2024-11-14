@@ -18,7 +18,9 @@ export default function Home() {
               <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
                 <div className="rounded-md shadow">
                   <Button asChild className="w-full">
-                    <Link href="/sign-up">Get Started</Link>
+                    <Link href="/auth-callback?origin=dashboard">
+                      Get Started
+                    </Link>
                   </Button>
                 </div>
                 <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
