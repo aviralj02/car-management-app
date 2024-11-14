@@ -12,19 +12,48 @@ type Props = {};
 
 const SignUp = (props: Props) => {
   const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const router = useRouter();
 
   const { createUserWithEmailAndPassword } = useAuth();
 
+  const createUser = async (
+    uid: string,
+    name: string,
+    email: string,
+    createdAt: Date
+  ) => {
+    try {
+      const res = await fetch("/api/user", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          uid,
+          createdAt,
+        }),
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log("Success!!");
-        router.push("/auth-callback?origin=dashboard");
+      .then(({ user }: { user: any }) => {
+        createUser(user.uid, name, email, new Date());
+
+        router.push("/dashboard");
       })
       .catch((error: unknown) => {
         console.log(error);
@@ -42,6 +71,22 @@ const SignUp = (props: Props) => {
 
         <form className="mt-8 space-y-6" onSubmit={onSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <Label htmlFor="name" className="sr-only">
+                Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                required
+                placeholder="Name"
+                value={name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setName(e.target.value)
+                }
+              />
+            </div>
             <div>
               <Label htmlFor="email-address" className="sr-only">
                 Email address
