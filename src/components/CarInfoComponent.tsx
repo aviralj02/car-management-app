@@ -26,6 +26,8 @@ import { CarType } from "@/enums";
 import ProtectedRoute from "./ProtectedRoute";
 import PageWrapper from "./PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthUserContext";
 
 type Props = {
   car: CarWithId;
@@ -33,13 +35,14 @@ type Props = {
 };
 
 const CarInfoComponent = ({ car, carId }: Props) => {
+  const { authUser } = useAuth();
+
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<CarWithId>(car);
 
   const [newTag, setNewTag] = useState<string>("");
   const [tags, setTags] = useState<string[]>(car.tags || []);
 
-  const [images, setImages] = useState<File[]>([]);
   const [imagesToUpload, setImagesToUpload] = useState<string[]>(
     car.images || []
   );
@@ -47,6 +50,7 @@ const CarInfoComponent = ({ car, carId }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -67,23 +71,19 @@ const CarInfoComponent = ({ car, carId }: Props) => {
     const files = e.target.files;
     if (files) {
       const base64Images: string[] = [];
-      const newFiles: File[] = [];
 
       await Promise.all(
         Array.from(files).map(async (file) => {
           const base64 = (await fileToBase64(file)) as string;
           base64Images.push(base64);
-          newFiles.push(file);
         })
       );
 
-      setImages((prev) => [...prev, ...newFiles]);
       setImagesToUpload((prev) => [...prev, ...base64Images]);
     }
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
     setImagesToUpload((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -106,13 +106,27 @@ const CarInfoComponent = ({ car, carId }: Props) => {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     toast({
       title: "Delete Initiated",
       description: "You've chosen to delete this car listing.",
       variant: "destructive",
     });
-    // Implement delete logic here
+
+    try {
+      const res = await fetch(`/api/car/modify/${carId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        router.push("/mycars");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,24 +169,27 @@ const CarInfoComponent = ({ car, carId }: Props) => {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-3xl font-bold">Car Details</CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleUpdate}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    <span>Update</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDelete}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+              {authUser?.uid === car.dealer && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleUpdate}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span>Update</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDelete}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </CardHeader>
           <CardContent>

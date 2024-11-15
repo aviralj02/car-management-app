@@ -20,7 +20,7 @@ type Props = {};
 
 const MyCars = (props: Props) => {
   const { authUser } = useAuth();
-  const [userCars, setUserCars] = useState<CarWithId[]>();
+  const [userCars, setUserCars] = useState<CarWithId[]>([]);
 
   const fetchUserCars = async () => {
     try {
@@ -66,11 +66,17 @@ const MyCars = (props: Props) => {
           </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {userCars?.map((car: CarWithId) => (
-            <CarComponent car={car} global={false} key={car.id} />
-          ))}
-        </div>
+        {userCars.length === 0 ? (
+          <div className="grid items-center justify-center h-full animate-pulse">
+            Nothing to show here...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {userCars?.map((car: CarWithId) => (
+              <CarComponent car={car} global={false} key={car.id} />
+            ))}
+          </div>
+        )}
       </PageWrapper>
     </ProtectedRoute>
   );

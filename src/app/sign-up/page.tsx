@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthUserContext";
+import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { ChangeEvent, FormEvent, useState } from "react";
@@ -14,8 +15,10 @@ const SignUp = (props: Props) => {
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const { createUserWithEmailAndPassword } = useAuth();
 
@@ -48,15 +51,23 @@ const SignUp = (props: Props) => {
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    setLoading(true);
 
     createUserWithEmailAndPassword(email, password)
       .then(({ user }: { user: any }) => {
         createUser(user.uid, name, email, new Date());
 
+        setLoading(false);
         router.push("/dashboard");
       })
-      .catch((error: unknown) => {
+      .catch((error: any) => {
         console.log(error);
+        setLoading(false);
+
+        toast({
+          title: "Something went wrong!",
+          description: error,
+        });
       });
   };
 

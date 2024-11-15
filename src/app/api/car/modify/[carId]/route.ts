@@ -11,10 +11,14 @@ export async function PATCH(
 
   try {
     const uploadPromises = body.images.map(async (file: string) => {
-      const uploadedImage = await cloudinary.uploader.upload(file, {
-        folder: "car-management-app",
-      });
-      return uploadedImage.secure_url;
+      if (file.startsWith("data:")) {
+        const uploadedImage = await cloudinary.uploader.upload(file, {
+          folder: "car-management-app",
+        });
+        return uploadedImage.secure_url;
+      }
+
+      return file;
     });
 
     const uploadedUrls = await Promise.all(uploadPromises);
@@ -42,7 +46,10 @@ export async function DELETE(
     const { result, error } = await deleteCar("cars", carId);
 
     if (result) {
-      return Response.json({ result }, { status: 200 });
+      return Response.json(
+        { message: "Car Deleted Successfully!" },
+        { status: 200 }
+      );
     }
 
     return Response.json({ message: error }, { status: 501 });

@@ -34,7 +34,6 @@ type Props = {};
 const CreateCar = (props: Props) => {
   const { authUser } = useAuth();
 
-  const [images, setImages] = useState<File[]>([]);
   const [imagesToUpload, setImagesToUpload] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -48,23 +47,19 @@ const CreateCar = (props: Props) => {
     const files = e.target.files;
     if (files) {
       const base64Images: string[] = [];
-      const newFiles: File[] = [];
 
       await Promise.all(
         Array.from(files).map(async (file) => {
           const base64 = (await fileToBase64(file)) as string;
           base64Images.push(base64);
-          newFiles.push(file);
         })
       );
 
-      setImages((prev) => [...prev, ...newFiles]);
       setImagesToUpload((prev) => [...prev, ...base64Images]);
     }
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
     setImagesToUpload((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -199,10 +194,10 @@ const CreateCar = (props: Props) => {
                 className="h-16 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
               />
               <div className="flex flex-wrap gap-2 mt-2">
-                {images.map((image, index) => (
+                {imagesToUpload.map((image, index) => (
                   <div key={index} className="relative">
                     <img
-                      src={URL.createObjectURL(image)}
+                      src={image}
                       alt={`Uploaded ${index + 1}`}
                       className="w-20 h-20 object-cover rounded"
                     />
