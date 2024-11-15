@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -20,9 +18,7 @@ export default function Home() {
               <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
                 <div className="rounded-md shadow">
                   <Button asChild className="w-full">
-                    <Link href="/auth-callback?origin=dashboard">
-                      Get Started
-                    </Link>
+                    <Link href="/dashboard">Get Started</Link>
                   </Button>
                 </div>
                 <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
