@@ -22,6 +22,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthUserContext";
+import { CarType } from "@/enums";
 import { useToast } from "@/hooks/use-toast";
 import { fileToBase64 } from "@/lib/utils";
 import { X, Plus, Loader2 } from "lucide-react";
@@ -29,14 +30,6 @@ import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
 
 type Props = {};
-
-enum CarType {
-  Sedan = "sedan",
-  SUV = "suv",
-  Hatchback = "hatchback",
-  Coupe = "coupe",
-  Truck = "truck",
-}
 
 const CreateCar = (props: Props) => {
   const { authUser } = useAuth();

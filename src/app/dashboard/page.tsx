@@ -3,9 +3,8 @@
 import PageWrapper from "@/components/PageWrapper";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthUserContext";
 import { Menu } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +13,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import CarComponent from "@/components/CarComponent";
 
 type Props = {};
 
 const Dashboard = (props: Props) => {
-  const { authUser } = useAuth();
+  const [allCars, setAllCars] = useState<CarWithId[]>();
+
+  const fetchAllActiveCars = async () => {
+    try {
+      const res = await fetch("/api/car");
+      const data = await res.json();
+
+      setAllCars(data.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(allCars && allCars[0].id);
+
+  useEffect(() => {
+    fetchAllActiveCars();
+  }, []);
+
   return (
     <ProtectedRoute>
       <PageWrapper className="my-8">
@@ -46,7 +64,11 @@ const Dashboard = (props: Props) => {
           </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {allCars?.map((car: CarWithId) => (
+            <CarComponent global car={car} key={car.id} />
+          ))}
+        </div>
       </PageWrapper>
     </ProtectedRoute>
   );

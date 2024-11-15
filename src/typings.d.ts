@@ -28,3 +28,7 @@ interface Car {
   images: string[];
   tags: string[];
 }
+
+type CarWithId = Car & {
+  id: string;
+};
