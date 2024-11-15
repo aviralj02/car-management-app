@@ -2,6 +2,67 @@ import deleteCar from "@/firebase/utils/deleteCar";
 import updateCarDetails from "@/firebase/utils/updateCarDetails";
 import cloudinary from "@/lib/cloudinary";
 
+/**
+ * @swagger
+ * /api/car/modify/{carId}:
+ *   patch:
+ *     summary: Update a car by ID
+ *     tags: [Cars]
+ *     parameters:
+ *       - in: path
+ *         name: carId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the car to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               company:
+ *                 type: string
+ *               carType:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: Base64 strings or URLs of car images
+ *               isActive:
+ *                 type: boolean
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Car updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 result:
+ *                   type: object
+ *                   description: Updated car details
+ *       501:
+ *         description: Error occurred while updating the car
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to update car"
+ */
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ carId: string }> }
@@ -36,6 +97,41 @@ export async function PATCH(
   }
 }
 
+/**
+ * @swagger
+ * /api/car/modify/{carId}:
+ *   delete:
+ *     summary: Delete a car by ID
+ *     tags: [Cars]
+ *     parameters:
+ *       - in: path
+ *         name: carId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the car to delete
+ *     responses:
+ *       200:
+ *         description: Car deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Car Deleted Successfully!"
+ *       501:
+ *         description: Error occurred while deleting the car
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to delete car"
+ */
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ carId: string }> }
