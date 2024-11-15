@@ -21,28 +21,58 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Plus } from "lucide-react";
-import React, { useState } from "react";
+import { useAuth } from "@/context/AuthUserContext";
+import { useToast } from "@/hooks/use-toast";
+import { fileToBase64 } from "@/lib/utils";
+import { X, Plus, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { FormEvent, useState } from "react";
 
 type Props = {};
 
+enum CarType {
+  Sedan = "sedan",
+  SUV = "suv",
+  Hatchback = "hatchback",
+  Coupe = "coupe",
+  Truck = "truck",
+}
+
 const CreateCar = (props: Props) => {
-  const [images, setImages] = useState<string[]>([]);
+  const { authUser } = useAuth();
+
+  const [images, setImages] = useState<File[]>([]);
+  const [imagesToUpload, setImagesToUpload] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+  const [carType, setCarType] = useState<CarType | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
+      const base64Images: string[] = [];
+      const newFiles: File[] = [];
+
+      await Promise.all(
+        Array.from(files).map(async (file) => {
+          const base64 = (await fileToBase64(file)) as string;
+          base64Images.push(base64);
+          newFiles.push(file);
+        })
       );
-      setImages((prev) => [...prev, ...newImages]);
+
+      setImages((prev) => [...prev, ...newFiles]);
+      setImagesToUpload((prev) => [...prev, ...base64Images]);
     }
   };
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagesToUpload((prev) => prev.filter((_, i) => i !== index));
   };
 
   const addTag = () => {
@@ -56,10 +86,45 @@ const CreateCar = (props: Props) => {
     setTags((prev) => prev.filter((t) => t !== tag));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("submit");
-  }; //TODO
+    setLoading(true);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+
+    const formValues = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      dealer: authUser?.uid,
+      company: formData.get("company") as string,
+      isActive: (formData.get("isActive") as string) === "on" ? true : false,
+      car_type: carType,
+      images: imagesToUpload,
+      tags,
+    };
+
+    try {
+      const res = await fetch("/api/car", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formValues),
+      });
+
+      if (res.ok) {
+        router.push("/mycars");
+        setLoading(false);
+      } else {
+        toast({
+          title: "Car cannot be created!",
+          description: "An error has occurred",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <PageWrapper className="my-8">
@@ -75,12 +140,18 @@ const CreateCar = (props: Props) => {
           <form onSubmit={handleSubmit} className="space-y-4" id="car-form">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" placeholder="Enter car title" required />
+              <Input
+                name="title"
+                id="title"
+                placeholder="Enter car title"
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
+                name="description"
                 id="description"
                 placeholder="Enter car description"
                 required
@@ -89,51 +160,56 @@ const CreateCar = (props: Props) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dealer">Dealer</Label>
-                <Input id="dealer" placeholder="Enter dealer name" required />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
-                <Input id="company" placeholder="Enter car company" required />
+                <Input
+                  name="company"
+                  id="company"
+                  placeholder="Enter car company"
+                  required
+                />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="carType">Car Type</Label>
-              <Select required>
-                <SelectTrigger id="carType">
-                  <SelectValue placeholder="Select car type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sedan">Sedan</SelectItem>
-                  <SelectItem value="suv">SUV</SelectItem>
-                  <SelectItem value="hatchback">Hatchback</SelectItem>
-                  <SelectItem value="coupe">Coupe</SelectItem>
-                  <SelectItem value="truck">Truck</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="carType">Car Type</Label>
+                <Select
+                  required
+                  onValueChange={(value) => setCarType(value as CarType)}
+                >
+                  <SelectTrigger id="carType" name="carType">
+                    <SelectValue placeholder="Select car type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sedan">Sedan</SelectItem>
+                    <SelectItem value="suv">SUV</SelectItem>
+                    <SelectItem value="hatchback">Hatchback</SelectItem>
+                    <SelectItem value="coupe">Coupe</SelectItem>
+                    <SelectItem value="truck">Truck</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
-              <Switch id="isActive" />
+              <Switch id="isActive" name="isActive" />
               <Label htmlFor="isActive">Active Listing</Label>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="images">Images</Label>
               <Input
+                name="images"
                 id="images"
                 type="file"
                 multiple
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                className="h-16 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
               />
               <div className="flex flex-wrap gap-2 mt-2">
                 {images.map((image, index) => (
                   <div key={index} className="relative">
                     <img
-                      src={image}
+                      src={URL.createObjectURL(image)}
                       alt={`Uploaded ${index + 1}`}
                       className="w-20 h-20 object-cover rounded"
                     />
@@ -154,6 +230,7 @@ const CreateCar = (props: Props) => {
               <Label htmlFor="tags">Tags</Label>
               <div className="flex space-x-2">
                 <Input
+                  name="tags"
                   id="tags"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
@@ -193,7 +270,11 @@ const CreateCar = (props: Props) => {
 
         <CardFooter>
           <Button type="submit" className="w-full" form="car-form">
-            Submit
+            {loading ? (
+              <Loader2 className="w-5 h-auto animate-spin" />
+            ) : (
+              "Submit"
+            )}
           </Button>
         </CardFooter>
       </Card>
