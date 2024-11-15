@@ -3766,7 +3766,7 @@ neotraverse@=0.6.18:
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-0.6.18.tgz#abcb33dda2e8e713cf6321b29405e822230cdb30"
   integrity sha512-Z4SmBUweYa09+o6pG+eASabEpP6QkQ70yHj351pQoEXIs8uHbaU2DWVmzBANKgflPa47A50PtB2+NgRpQvr7vA==
 
-next-swagger-doc@^0.4.1:
+next-swagger-doc@^0.4.0:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/next-swagger-doc/-/next-swagger-doc-0.4.1.tgz#959a2e36e413f3f7f3398518031c92f828f70a90"
   integrity sha512-pFmFUOwNlJh7mr9P6b2obAHa9JAwgPK3oNTIzE9g/Gs+h2OG1T3C5SanzrqGA3dDncagyf/DbO5U+ZzNxKadWg==
