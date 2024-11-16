@@ -39,3 +39,8 @@ yarn install
 ```bash
 yarn dev
 ```
+
+### 🐛 BUG
+
+- Protected Route doesn't work on typing a route manually but works on redirecting from pages.
+  (Soln: Make a `middleware.ts` file instead, store the uid in cookies on signIn, and validate its presence before allowing redirection to the desired page)
