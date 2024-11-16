@@ -9,15 +9,6 @@ export const getApiDocs = async () => {
         title: "Car Management App",
         version: "1.0",
       },
-      components: {
-        securitySchemes: {
-          BearerAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "JWT",
-          },
-        },
-      },
       security: [],
     },
   });

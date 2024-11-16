@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !authUser?.uid) {
+    if (!authUser?.uid) {
       router.push("/log-in");
     }
   }, [authUser]);
