@@ -1,7 +1,5 @@
 import { getApiDocs } from "@/lib/swagger";
-import dynamic from "next/dynamic";
-
-const ReactSwagger = dynamic(() => import("./SwaggerUI"));
+import ReactSwagger from "./SwaggerUI";
 
 export default async function IndexPage() {
   const spec = await getApiDocs();
